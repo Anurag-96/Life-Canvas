@@ -1,0 +1,113 @@
+<div class="min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+       <div [class]="'bg-' + themeService.primaryColor() + '-500'" class="rounded-lg p-2 flex-shrink-0 inline-flex">
+          <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+      </div>
+      <h1 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">
+        @if (isLoginView()) {
+          Sign in to Life Canvas
+        } @else {
+          Create your Account
+        }
+      </h1>
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700">
+      <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+        @if (!isLoginView()) {
+          <div>
+            <label for="name" class="block text-base font-medium leading-6 text-gray-900 dark:text-slate-200">Full Name</label>
+            <div class="mt-2">
+              <input id="name" formControlName="name" type="text" autocomplete="name" required [class]="'focus:border-' + themeService.primaryColor() + '-500'" class="block w-full rounded-md bg-transparent border-2 border-gray-300 dark:border-slate-600 py-3 px-4 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none sm:text-base sm:leading-6 transition-colors">
+            </div>
+            @if (name?.invalid && (name?.dirty || name?.touched)) {
+              <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-md text-sm">
+                @if (name?.errors?.['required']) {
+                  Name is required.
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <div [class]="!isLoginView() ? 'mt-4' : ''">
+          <label for="email" class="block text-base font-medium leading-6 text-gray-900 dark:text-slate-200">Email address</label>
+          <div class="mt-2">
+            <input id="email" formControlName="email" type="email" autocomplete="email" required [class]="'focus:border-' + themeService.primaryColor() + '-500'" class="block w-full rounded-md bg-transparent border-2 border-gray-300 dark:border-slate-600 py-3 px-4 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none sm:text-base sm:leading-6 transition-colors">
+          </div>
+          @if (email?.invalid && (email?.dirty || email?.touched)) {
+            <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-md text-sm">
+              @if (email?.errors?.['required']) {
+                Email is required.
+              }
+              @if (email?.errors?.['email']) {
+                Please enter a valid email address.
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mt-4">
+          <label for="password" class="block text-base font-medium leading-6 text-gray-900 dark:text-slate-200">Password</label>
+          <div class="mt-2">
+            <input id="password" formControlName="password" type="password" autocomplete="current-password" required [class]="'focus:border-' + themeService.primaryColor() + '-500'" class="block w-full rounded-md bg-transparent border-2 border-gray-300 dark:border-slate-600 py-3 px-4 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none sm:text-base sm:leading-6 transition-colors">
+          </div>
+          @if (password?.invalid && (password?.dirty || password?.touched)) {
+            <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-md text-sm">
+              @if (password?.errors?.['required']) {
+                Password is required.
+              }
+              @if (password?.errors?.['minlength']) {
+                Password must be at least 6 characters.
+              }
+            </div>
+          }
+        </div>
+
+        @if (errorMessage()) {
+            <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-md text-sm">
+                {{ errorMessage() }}
+            </div>
+        }
+
+        <div class="mt-6">
+          <button type="submit" [disabled]="authForm.invalid || isLoading()" 
+            [class]="'bg-' + themeService.primaryColor() + '-400 hover:bg-' + themeService.primaryColor() + '-500 focus-visible:outline-' + themeService.primaryColor() + '-500 disabled:bg-' + themeService.primaryColor() + '-300'"
+            class="flex w-full justify-center items-center rounded-md px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed transition-colors">
+            @if (isLoading()) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            } @else {
+                @if (isLoginView()) {
+                    Sign in
+                } @else {
+                    Create account
+                }
+            }
+          </button>
+        </div>
+      </form>
+
+      <p class="mt-8 text-center text-sm text-gray-500 dark:text-slate-400">
+        @if (isLoginView()) {
+          Not a member?
+        } @else {
+          Already have an account?
+        }
+        <button (click)="toggleView()" [class]="'text-' + themeService.primaryColor() + '-500 hover:text-' + themeService.primaryColor() + '-600'" class="font-semibold leading-6 transition-colors">
+          @if (isLoginView()) {
+            Sign up now
+          } @else {
+            Sign in
+          }
+        </button>
+      </p>
+    </div>
+  </div>
+</div>

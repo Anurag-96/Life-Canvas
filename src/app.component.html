@@ -1,0 +1,7 @@
+<main>
+  @if (currentUser()) {
+    <app-journal></app-journal>
+  } @else {
+    <app-auth></app-auth>
+  }
+</main>

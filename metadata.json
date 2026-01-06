@@ -1,0 +1,5 @@
+{
+  "name": "Life Canvas",
+  "description": "A secure and personal daily journal to write down your thoughts, track your mood, and reflect on your day. Features include user authentication, mood tracking, and entry management, all stored locally in your browser.",
+  "requestFramePermissions": []
+}

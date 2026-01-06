@@ -1,0 +1,270 @@
+<div class="min-h-screen">
+  <!-- Header -->
+  <header class="bg-white/95 dark:bg-gray-800/95 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-3">
+          <div [class]="'bg-' + themeService.primaryColor() + '-500'" class="rounded-lg p-2 flex-shrink-0">
+             <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Life Canvas</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+          @if(journalStreak() > 0) {
+            <div class="hidden sm:flex items-center gap-1 text-orange-500 bg-orange-100 dark:bg-orange-900/50 dark:text-orange-400 px-3 py-1.5 rounded-full">
+                <span class="font-bold text-sm">{{ journalStreak() }}</span>
+                <span class="text-lg">🔥</span>
+            </div>
+          }
+          @if(currentUser(); as user) {
+            <div class="text-sm text-gray-500 hidden sm:flex items-center space-x-2">
+                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold">
+                    {{ (user.user_metadata.name || user.email)?.charAt(0).toUpperCase() }}
+                </span>
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ user.user_metadata.name || user.email?.split('@')[0] }}</span>
+            </div>
+          }
+           <button (click)="isSettingsVisible.set(true)" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors">
+            <span class="sr-only">Settings</span>
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 01-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.075-.124.072-.044.146-.087.22-.127.332-.183.582-.495.645-.87l.213-1.281z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+          <button (click)="logout()" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors">
+            <span class="sr-only">Log out</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (isFormVisible()) {
+      <!-- Form View -->
+      <div>
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center space-x-4">
+            <button (click)="cancelForm()" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+              @if (editingEntry()) {
+                Edit Entry
+              } @else {
+                New Entry
+              }
+            </h2>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <form [formGroup]="entryForm" (ngSubmit)="saveEntry()">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+              <div>
+                <label for="entry-date" class="block text-base font-medium text-gray-900 dark:text-gray-200">Date</label>
+                <input id="entry-date" type="date" formControlName="date" [class]="'focus:border-' + themeService.primaryColor() + '-500'" class="mt-2 block w-full rounded-md bg-transparent border-2 border-gray-300 dark:border-slate-600 py-2.5 px-4 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none sm:text-base sm:leading-6 transition-colors">
+              </div>
+              <div>
+                <label for="entry-time" class="block text-base font-medium text-gray-900 dark:text-gray-200">Time</label>
+                <input id="entry-time" type="time" formControlName="time" [class]="'focus:border-' + themeService.primaryColor() + '-500'" class="mt-2 block w-full rounded-md bg-transparent border-2 border-gray-300 dark:border-slate-600 py-2.5 px-4 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none sm:text-base sm:leading-6 transition-colors">
+              </div>
+            </div>
+
+            <fieldset class="mb-8">
+              <legend class="text-base font-medium text-gray-900 dark:text-gray-200 mb-4">How are you feeling today?</legend>
+              <div class="flex flex-wrap items-center gap-2 pb-2">
+                @for (mood of moods; track mood.name) {
+                  <button type="button" 
+                          (click)="entryForm.get('mood')?.setValue(mood.name)" 
+                          [attr.aria-pressed]="entryForm.get('mood')?.value === mood.name" 
+                          [class]="entryForm.get('mood')?.value === mood.name ? 'bg-' + themeService.primaryColor() + '-100 text-' + themeService.primaryColor() + '-700 border-' + themeService.primaryColor() + '-300 dark:bg-' + themeService.primaryColor() + '-900/50 dark:text-' + themeService.primaryColor() + '-300 dark:border-' + themeService.primaryColor() + '-700' : 'bg-gray-100 text-gray-700 border-transparent dark:bg-gray-700 dark:text-gray-300'" 
+                          class="group flex items-center space-x-2 px-3 py-1.5 rounded-full border text-sm font-medium transition flex-shrink-0">
+                    <span class="transition-transform duration-200 group-hover:scale-125" aria-hidden="true">{{ mood.emoji }}</span>
+                    <span>{{ mood.name }}</span>
+                  </button>
+                }
+              </div>
+            </fieldset>
+            
+            <div>
+              <label for="entry-title" class="sr-only">Title</label>
+              <input id="entry-title" formControlName="title" placeholder="Title your day..." class="text-2xl sm:text-4xl font-bold w-full focus:outline-none placeholder-gray-300 dark:placeholder-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+            </div>
+            
+            <div class="mt-4">
+              <label for="entry-content" class="sr-only">Content</label>
+              <textarea id="entry-content" formControlName="content" placeholder="Write your thoughts here." class="font-serif w-full h-64 focus:outline-none text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 resize-none text-lg bg-white dark:bg-gray-800"></textarea>
+            </div>
+            
+            @if(aiReflection()) {
+                <div [class]="'bg-' + themeService.primaryColor() + '-50/75 dark:bg-' + themeService.primaryColor() + '-900/40 border-' + themeService.primaryColor() + '-200 dark:border-' + themeService.primaryColor() + '-800'" class="mt-6 p-4 rounded-lg border">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-xl">✨</span>
+                        <div>
+                            <h4 [class]="'text-' + themeService.primaryColor() + '-900 dark:text-' + themeService.primaryColor() + '-200'" class="font-semibold">AI Reflection</h4>
+                            <p [class]="'text-' + themeService.primaryColor() + '-800/90 dark:text-' + themeService.primaryColor() + '-300'" class="font-serif mt-1 text-sm">{{ aiReflection() }}</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <button type="button" (click)="getReflection()" [disabled]="!canReflect() || isReflecting()" class="w-full inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                 @if(isReflecting()) {
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Reflecting...
+                 } @else {
+                    Reflect with AI ✨
+                 }
+              </button>
+              <button type="submit" [disabled]="entryForm.invalid" [class]="'bg-' + themeService.primaryColor() + '-500 hover:bg-' + themeService.primaryColor() + '-600 disabled:opacity-50'" class="w-full inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 text-white disabled:cursor-not-allowed transition-colors">
+                Save Entry
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    } @else {
+      <!-- List & Calendar Views -->
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Your Journey</h2>
+        
+        <!-- Controls -->
+        <div class="mb-6 space-y-4">
+          <!-- Mood Filters & View Switcher -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+              <span class="text-sm font-medium text-gray-600 dark:text-gray-400 flex-shrink-0">Filter:</span>
+              @for (mood of moods; track mood.name) {
+                <button type="button" (click)="setMoodFilter(mood.name)" [class]="moodFilter() === mood.name ? 'bg-' + themeService.primaryColor() + '-100 text-' + themeService.primaryColor() + '-700 border-' + themeService.primaryColor() + '-300 dark:bg-' + themeService.primaryColor() + '-900/50 dark:text-' + themeService.primaryColor() + '-300 dark:border-' + themeService.primaryColor() + '-700' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600'" class="group flex items-center space-x-2 px-3 py-1.5 rounded-full border text-sm font-medium transition flex-shrink-0">
+                  <span>{{ mood.emoji }}</span>
+                  <span class="hidden sm:inline">{{ mood.name }}</span>
+                </button>
+              }
+            </div>
+            <div class="flex items-center self-end sm:self-center bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button (click)="setViewMode('list')" [class]="viewMode() === 'list' ? 'bg-white dark:bg-gray-800 shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-2 rounded-md transition-colors">
+                    <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
+                </button>
+                <button (click)="setViewMode('calendar')" [class]="viewMode() === 'calendar' ? 'bg-white dark:bg-gray-800 shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-2 rounded-md transition-colors">
+                    <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zM4.5 8.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V8.5h-11z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+          </div>
+          <!-- Search & New Entry -->
+          <div class="flex items-center gap-4 w-full">
+            <div class="relative flex-grow">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                  </svg>
+              </div>
+              <input type="text" placeholder="Search entries..." [value]="searchQuery()" (input)="onSearch($event)" [class]="'focus:border-' + themeService.primaryColor() + '-500 focus:ring-' + themeService.primaryColor() + '-500'" class="block w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-10 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 sm:text-sm sm:leading-6">
+            </div>
+            <button (click)="showCreateForm()" [class]="'bg-' + themeService.primaryColor() + '-500 hover:bg-' + themeService.primaryColor() + '-600'" class="inline-flex items-center justify-center rounded-md text-sm font-medium px-4 py-2 text-white transition-colors flex-shrink-0">
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+              </svg>
+              New Entry
+            </button>
+          </div>
+        </div>
+
+        @if (viewMode() === 'list') {
+          @if (entries().length > 0) {
+            <div class="space-y-4">
+              @for (entry of filteredEntries(); track entry.id) {
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02] border border-gray-200 dark:border-gray-700 dark:shadow-none border-l-4"
+                  [class]="getBorderClasses(entry.mood)"
+                >
+                  <div class="flex justify-between items-start">
+                    <div class="flex items-start space-x-4">
+                      <span class="text-3xl mt-1 transition-transform duration-200 hover:scale-125">{{ getMoodEmoji(entry.mood) }}</span>
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ entry.title }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          {{ entry.date | date:'fullDate' }}
+                          @if(entry.time) {
+                            <span class="text-gray-400 dark:text-gray-500"> &bull; </span>
+                            {{ (entry.date + 'T' + entry.time) | date:'shortTime' }}
+                          }
+                        </p>
+                        <p class="font-serif mt-3 text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{{ entry.content.substring(0, 200) }}{{ entry.content.length > 200 ? '...' : '' }}</p>
+                      </div>
+                    </div>
+                    <div class="flex space-x-1 flex-shrink-0 ml-4">
+                      <button (click)="showEditForm(entry)" class="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                          <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                      <button (click)="promptDelete(entry.id)" class="p-2 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-500 dark:hover:bg-red-900/30 transition-colors">
+                         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.22-2.365.468a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193v-.443A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            @if(filteredEntries().length === 0) {
+              <div class="text-center py-16 px-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 mt-4">
+                <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">No Entries Found</h3>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Your search or filter criteria did not match any entries. Try adjusting your filters.</p>
+              </div>
+            }
+          } @else {
+            <div class="text-center py-16 px-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+               <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+              <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Your journal is waiting</h3>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Every entry is a step on your journey. Start writing today.</p>
+              <div class="mt-6">
+                <button (click)="showCreateForm()" type="button" [class]="'bg-' + themeService.primaryColor() + '-500 hover:bg-' + themeService.primaryColor() + '-600 focus-visible:outline-' + themeService.primaryColor() + '-600'" class="inline-flex items-center rounded-md px-3.5 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors">
+                  <svg class="-ml-0.5 mr-1.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                  </svg>
+                  Write First Entry
+                </button>
+              </div>
+            </div>
+          }
+        } @else {
+            <app-mood-calendar [entries]="entries()"></app-mood-calendar>
+        }
+      </div>
+    }
+  </main>
+
+  @if(showDeleteConfirm()) {
+    <app-confirmation-dialog
+      title="Delete Entry?"
+      message="Are you sure you want to delete this journal entry? This action cannot be undone."
+      confirmText="Delete"
+      (confirm)="confirmDelete()"
+      (cancel)="cancelDelete()">
+    </app-confirmation-dialog>
+  }
+  
+  @if(isSettingsVisible()) {
+      <app-settings-modal (close)="isSettingsVisible.set(false)"></app-settings-modal>
+  }
+</div>
