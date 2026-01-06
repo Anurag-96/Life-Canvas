@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI } from '@google/genai';
+import { environment } from '../env';
 
 @Injectable({
   providedIn: 'root',
@@ -8,9 +9,9 @@ export class GeminiService {
   private ai: GoogleGenAI | null = null;
 
   constructor() {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      console.warn('Gemini API key not configured. AI features will be disabled.');
+    const apiKey = environment.gemini.apiKey;
+    if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+      console.warn('Gemini API key not configured in src/env.ts. AI features will be disabled.');
     } else {
         this.ai = new GoogleGenAI({ apiKey: apiKey });
     }
@@ -21,7 +22,7 @@ export class GeminiService {
     content: string
   ): Promise<string> {
     if (!this.ai) {
-        return 'AI features are not available. Please configure your Gemini API key.';
+        return 'AI features are not available. Please configure your Gemini API key in src/env.ts.';
     }
     
     const prompt = `You are a friendly and supportive journal assistant. Your goal is to offer a gentle, positive perspective. Read the following journal entry and provide a short (2-3 sentences), encouraging reflection. Do not give advice or ask questions.
