@@ -147,6 +147,13 @@ npm start
 ```
 > **Note**: This project does not contain a `package.json` file. You may need to create one and add the necessary scripts to build and serve the Angular application.
 
+I HAVE DEPLOYED THE WEBSITE ON NETLIFIY 
+LINK: https://app.netlify.com/projects/lifecanvas456/agent-runs/695d1df0aaec2a608f50c889
+
+
+
+
+
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
