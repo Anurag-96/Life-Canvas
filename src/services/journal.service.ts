@@ -14,39 +14,49 @@ export class JournalService {
 
   journalStreak = computed(() => {
     const entries = this.entries();
-    if (entries.length === 0) {
-      return 0;
-    }
+    if (entries.length === 0) return 0;
 
     const entryDates = new Set(entries.map(e => e.date));
     let streak = 0;
-    
     const today = new Date();
     let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    // Check if there's an entry for today or yesterday to start the streak count
     if (entryDates.has(this.formatDate(currentDate))) {
       streak = 1;
     } else {
-      currentDate.setDate(currentDate.getDate() - 1); // Check yesterday
+      currentDate.setDate(currentDate.getDate() - 1);
       if (entryDates.has(this.formatDate(currentDate))) {
         streak = 1;
       } else {
-        return 0; // No entry today or yesterday, so streak is 0
+        return 0;
       }
     }
 
-    // Loop backwards from the day before the starting streak day
     while (streak > 0) {
       currentDate.setDate(currentDate.getDate() - 1);
       if (entryDates.has(this.formatDate(currentDate))) {
         streak++;
       } else {
-        break; // Streak is broken
+        break;
       }
     }
-
     return streak;
+  });
+
+  totalWords = computed(() => {
+    return this.entries().reduce((acc, entry) => acc + (entry.content?.trim().split(/\s+/).length || 0), 0);
+  });
+
+  totalReflections = computed(() => this.entries().length);
+
+  dominantMood = computed(() => {
+    const entries = this.entries();
+    if (entries.length === 0) return 'Neutral';
+    const moodCounts = entries.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(moodCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
   });
 
   private formatDate(date: Date): string {
@@ -56,22 +66,17 @@ export class JournalService {
     return `${year}-${month}-${day}`;
   }
 
-
   constructor() {
     effect(() => {
         const user = this.authService.currentUser();
-        if (user) {
-            this.loadEntries();
-        } else {
-            this.entries.set([]);
-        }
+        if (user) this.loadEntries();
+        else this.entries.set([]);
     });
   }
 
   private async loadEntries(): Promise<void> {
     const user = this.authService.currentUser();
     if(!user) return;
-
     const { data, error } = await this.supabase
         .from('journal_entries')
         .select('*')
@@ -79,53 +84,25 @@ export class JournalService {
         .order('date', { ascending: false })
         .order('time', { ascending: false, nullsFirst: false });
 
-    if (error) {
-        console.error('Error fetching entries:', error.message);
-        this.entries.set([]);
-    } else {
-        this.entries.set(data as JournalEntry[]);
-    }
+    if (error) this.entries.set([]);
+    else this.entries.set(data as JournalEntry[]);
   }
 
   async addEntry(entry: Omit<JournalEntry, 'id'>): Promise<void> {
     const user = this.authService.currentUser();
     if (!user) return;
-    
-    const { error } = await this.supabase
-      .from('journal_entries')
-      .insert([{ ...entry, user_id: user.id }]);
-
-    if (error) {
-        console.error('Error adding entry:', error.message);
-    } else {
-        await this.loadEntries();
-    }
+    const { error } = await this.supabase.from('journal_entries').insert([{ ...entry, user_id: user.id }]);
+    if (!error) await this.loadEntries();
   }
 
   async updateEntry(updatedEntry: JournalEntry): Promise<void> {
     const { id, title, content, date, mood, time } = updatedEntry;
-    const { error } = await this.supabase
-        .from('journal_entries')
-        .update({ title, content, date, mood, time })
-        .eq('id', id);
-    
-    if (error) {
-        console.error('Error updating entry:', error.message);
-    } else {
-        await this.loadEntries();
-    }
+    const { error } = await this.supabase.from('journal_entries').update({ title, content, date, mood, time }).eq('id', id);
+    if (!error) await this.loadEntries();
   }
 
   async deleteEntry(id: string): Promise<void> {
-    const { error } = await this.supabase
-        .from('journal_entries')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        console.error('Error deleting entry:', error.message);
-    } else {
-        await this.loadEntries();
-    }
+    const { error } = await this.supabase.from('journal_entries').delete().eq('id', id);
+    if (!error) await this.loadEntries();
   }
 }
