@@ -11,10 +11,11 @@ import { ConfirmationDialogComponent } from '../shared/confirmation-dialog.compo
 import { ThemeService } from '../../services/theme.service';
 import { MoodCalendarComponent } from '../mood-calendar/mood-calendar.component';
 import { SettingsModalComponent } from '../shared/settings-modal.component';
+import { EyeAvatarComponent } from '../shared/eye-avatar.component';
 
 @Component({
   selector: 'app-journal',
-  imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, MoodCalendarComponent, SettingsModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmationDialogComponent, MoodCalendarComponent, SettingsModalComponent, EyeAvatarComponent],
   templateUrl: './journal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -31,44 +32,44 @@ export class JournalComponent {
 
   isFormVisible = signal(false);
   editingEntry = signal<JournalEntry | null>(null);
-
   showDeleteConfirm = signal(false);
   entryToDeleteId = signal<string | null>(null);
-  
   isReflecting = signal(false);
   aiReflection = signal<string | null>(null);
-
   searchQuery = signal('');
   moodFilter = signal<Mood | null>(null);
   viewMode = signal<'list' | 'calendar'>('list');
-
   isSettingsVisible = signal(false);
+  isProfileVisible = signal(false);
+
+  totalWords = this.journalService.totalWords;
+  totalReflections = this.journalService.totalReflections;
+  dominantMood = this.journalService.dominantMood;
+
+  badges = computed(() => {
+    const streak = this.journalStreak();
+    const words = this.totalWords();
+    const reflections = this.totalReflections();
+    const badgesList = [];
+    if (streak >= 3) badgesList.push({ name: '3-Day Streak', icon: '🔥', color: 'orange' });
+    if (streak >= 7) badgesList.push({ name: 'Weekly Warrior', icon: '🛡️', color: 'blue' });
+    if (streak >= 10) badgesList.push({ name: '10-Day Legend', icon: '👑', color: 'yellow' });
+    if (words >= 1000) badgesList.push({ name: 'Wordsmith', icon: '✍️', color: 'emerald' });
+    if (reflections >= 5) badgesList.push({ name: 'Deep Reflector', icon: '🧠', color: 'purple' });
+    return badgesList;
+  });
 
   filteredEntries = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const mood = this.moodFilter();
     let entries = this.entries();
-
-    if (mood) {
-        entries = entries.filter(entry => entry.mood === mood);
-    }
-
-    if (query) {
-        entries = entries.filter(entry => 
-            entry.title.toLowerCase().includes(query) || 
-            entry.content.toLowerCase().includes(query)
-        );
-    }
-
+    if (mood) entries = entries.filter(entry => entry.mood === mood);
+    if (query) entries = entries.filter(entry => entry.title.toLowerCase().includes(query) || entry.content.toLowerCase().includes(query));
     return entries;
   });
 
   moods: { name: Mood; emoji: string }[] = [
-    { name: 'Happy', emoji: '😊' },
-    { name: 'Calm', emoji: '😌' },
-    { name: 'Sad', emoji: '😢' },
-    { name: 'Neutral', emoji: '😐' },
-    { name: 'Energetic', emoji: '⚡️' },
+    { name: 'Happy', emoji: '😊' }, { name: 'Calm', emoji: '😌' }, { name: 'Sad', emoji: '😢' }, { name: 'Neutral', emoji: '😐' }, { name: 'Energetic', emoji: '⚡️' },
   ];
 
   entryForm = this.fb.group({
@@ -80,49 +81,28 @@ export class JournalComponent {
   });
 
   private formValue = toSignal(this.entryForm.valueChanges.pipe(startWith(this.entryForm.value)));
-
-  canReflect = computed(() => {
-    const content = this.formValue()?.content;
-    return content && content.trim().length > 20;
-  });
+  canReflect = computed(() => (this.formValue()?.content?.trim().length || 0) > 20);
 
   private getTodayDateString(): string {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
   }
 
   private getCurrentTimeString(): string {
     const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   }
 
   showCreateForm(): void {
     this.editingEntry.set(null);
-    this.entryForm.reset({
-      title: '',
-      date: this.getTodayDateString(),
-      time: this.getCurrentTimeString(),
-      content: '',
-      mood: 'Neutral',
-    });
+    this.entryForm.reset({ title: '', date: this.getTodayDateString(), time: this.getCurrentTimeString(), content: '', mood: 'Neutral' });
     this.isFormVisible.set(true);
     this.aiReflection.set(null);
   }
 
   showEditForm(entry: JournalEntry): void {
     this.editingEntry.set(entry);
-    this.entryForm.setValue({
-      title: entry.title,
-      date: entry.date,
-      time: entry.time || this.getCurrentTimeString(),
-      content: entry.content,
-      mood: entry.mood || 'Neutral', // Fallback for old entries
-    });
+    this.entryForm.setValue({ title: entry.title, date: entry.date, time: entry.time || this.getCurrentTimeString(), content: entry.content, mood: entry.mood || 'Neutral' });
     this.isFormVisible.set(true);
     this.aiReflection.set(null);
   }
@@ -134,47 +114,26 @@ export class JournalComponent {
   }
 
   async saveEntry(): Promise<void> {
-    if (this.entryForm.invalid) {
-      return;
-    }
-
+    if (this.entryForm.invalid) return;
     const formValue = this.entryForm.value;
     const currentEntry = this.editingEntry();
-
     if (currentEntry) {
-      await this.journalService.updateEntry({
-        ...currentEntry,
-        title: formValue.title!,
-        date: formValue.date!,
-        time: formValue.time!,
-        content: formValue.content!,
-        mood: formValue.mood! as Mood,
-      });
+      await this.journalService.updateEntry({ ...currentEntry, title: formValue.title!, date: formValue.date!, time: formValue.time!, content: formValue.content!, mood: formValue.mood! as Mood });
     } else {
-      await this.journalService.addEntry({
-        title: formValue.title!,
-        date: formValue.date!,
-        time: formValue.time!,
-        content: formValue.content!,
-        mood: formValue.mood! as Mood,
-      });
+      await this.journalService.addEntry({ title: formValue.title!, date: formValue.date!, time: formValue.time!, content: formValue.content!, mood: formValue.mood! as Mood });
     }
-
     this.cancelForm();
   }
 
   async getReflection(): Promise<void> {
     if (!this.canReflect()) return;
-
     this.isReflecting.set(true);
     this.aiReflection.set(null);
-    const { title, content } = this.entryForm.value;
-
     try {
-        const reflection = await this.geminiService.generateReflection(title!, content!);
+        const reflection = await this.geminiService.generateReflection(this.entryForm.value.title!, this.entryForm.value.content!);
         this.aiReflection.set(reflection);
-    } catch(err) {
-        this.aiReflection.set('There was an error generating your reflection.');
+    } catch {
+        this.aiReflection.set('Error generating reflection.');
     } finally {
         this.isReflecting.set(false);
     }
@@ -187,9 +146,7 @@ export class JournalComponent {
 
   async confirmDelete(): Promise<void> {
     const id = this.entryToDeleteId();
-    if (id) {
-      await this.journalService.deleteEntry(id);
-    }
+    if (id) await this.journalService.deleteEntry(id);
     this.cancelDelete();
   }
 
@@ -199,6 +156,7 @@ export class JournalComponent {
   }
 
   async logout(): Promise<void> {
+    this.isProfileVisible.set(false);
     await this.authService.logout();
   }
 
@@ -212,23 +170,16 @@ export class JournalComponent {
       case 'Calm': return 'border-l-green-400 dark:border-l-green-400';
       case 'Sad': return 'border-l-blue-400 dark:border-l-blue-400';
       case 'Energetic': return 'border-l-orange-500 dark:border-l-orange-400';
-      case 'Neutral':
-      default:
-        return 'border-l-gray-400 dark:border-l-gray-500';
+      default: return 'border-l-gray-400 dark:border-l-gray-500';
     }
   }
 
   onSearch(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.searchQuery.set(target.value);
+    this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 
   setMoodFilter(mood: Mood | null): void {
-    if (mood && this.moodFilter() === mood) {
-      this.moodFilter.set(null); // Toggle off if same mood is clicked
-    } else {
-      this.moodFilter.set(mood);
-    }
+    this.moodFilter.set(mood === this.moodFilter() ? null : mood);
   }
 
   setViewMode(mode: 'list' | 'calendar'): void {
