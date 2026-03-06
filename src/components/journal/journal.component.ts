@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { startWith } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { JournalService } from '../../services/journal.service';
 import { GeminiService } from '../../services/gemini.service';
@@ -77,8 +79,10 @@ export class JournalComponent {
     mood: ['Neutral' as Mood, Validators.required],
   });
 
+  private formValue = toSignal(this.entryForm.valueChanges.pipe(startWith(this.entryForm.value)));
+
   canReflect = computed(() => {
-    const content = this.entryForm.get('content')?.value;
+    const content = this.formValue()?.content;
     return content && content.trim().length > 20;
   });
 

@@ -118,20 +118,25 @@
             }
 
             <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-               <button type="button" (click)="getReflection()" [disabled]="!canReflect() || isReflecting()" class="w-full inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                 @if(isReflecting()) {
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Reflecting...
-                 } @else {
-                    Reflect with AI ✨
-                 }
-              </button>
-              <button type="submit" [disabled]="entryForm.invalid" [class]="'bg-' + themeService.primaryColor() + '-500 hover:bg-' + themeService.primaryColor() + '-600 disabled:opacity-50'" class="w-full inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 text-white disabled:cursor-not-allowed transition-colors">
-                Save Entry
-              </button>
+               <div class="flex flex-col gap-2">
+                 <button type="button" (click)="getReflection()" [disabled]="!canReflect() || isReflecting()" class="w-full inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                   @if(isReflecting()) {
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Reflecting...
+                   } @else {
+                      Reflect with AI ✨
+                   }
+                </button>
+                @if (!canReflect() && !isReflecting()) {
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center italic">Write a bit more (20+ chars) to enable AI reflection</p>
+                }
+               </div>
+               <button type="submit" [disabled]="entryForm.invalid" [class]="'bg-' + themeService.primaryColor() + '-500 hover:bg-' + themeService.primaryColor() + '-600 disabled:opacity-50'" class="w-full h-fit inline-flex items-center justify-center rounded-md text-lg font-medium px-4 py-3 text-white disabled:cursor-not-allowed transition-colors">
+                 Save Entry
+               </button>
             </div>
           </form>
         </div>
