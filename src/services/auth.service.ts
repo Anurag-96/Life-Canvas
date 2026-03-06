@@ -58,4 +58,27 @@ export class AuthService {
     await this.supabase.auth.signOut();
     this.currentUser.set(null);
   }
+
+  async deleteAccount(): Promise<{success: boolean, message: string}> {
+    const user = this.currentUser();
+    if (!user) return { success: false, message: 'No user logged in' };
+
+    try {
+      const { error: entriesError } = await this.supabase
+        .from('journal_entries')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (entriesError) throw entriesError;
+      await this.logout();
+
+      return { 
+        success: true, 
+        message: 'Your account data has been successfully deleted and you have been logged out.' 
+      };
+    } catch (error: any) {
+      console.error('Error deleting account data:', error);
+      return { success: false, message: error.message || 'Failed to delete account data' };
+    }
+  }
 }
