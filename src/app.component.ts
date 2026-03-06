@@ -7,16 +7,25 @@ import { ReminderService } from './services/reminder.service';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [CommonModule, AuthComponent, JournalComponent],
-  templateUrl: './app.component.html',
+  template: `
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      @if (!currentUser()) {
+        <app-auth></app-auth>
+      } @else {
+        <app-journal></app-journal>
+      }
+    </div>
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   private authService = inject(AuthService);
+  private reminderService = inject(ReminderService);
   currentUser = this.authService.currentUser;
 
   constructor() {
-    // Initialize the reminder service so it can run in the background
-    inject(ReminderService);
+    console.log('AppComponent initialized');
   }
 }

@@ -18,6 +18,7 @@ export class AuthComponent {
   isLoginView = signal(true);
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   authForm: FormGroup;
 
@@ -45,6 +46,7 @@ export class AuthComponent {
     this.isLoginView.update(v => !v);
     this.authForm.reset();
     this.errorMessage.set(null);
+    this.successMessage.set(null);
   }
 
   get name() {
@@ -65,6 +67,7 @@ export class AuthComponent {
     }
     this.isLoading.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     const { email, password, name } = this.authForm.value;
 
@@ -75,6 +78,9 @@ export class AuthComponent {
 
         if (!response.success) {
             this.errorMessage.set(response.message);
+        } else if (!this.isLoginView()) {
+            this.successMessage.set(response.message);
+            this.authForm.reset();
         }
     } catch(err) {
         const error = err as Error;
