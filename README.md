@@ -6,6 +6,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
+---
+
+### [**🚀 View Live Demo**](https://lifecanvas456.netlify.app/)
+
+---
+
 **Life Canvas** is a modern, secure, and personal journaling application designed to help you capture your thoughts, track your mood, and gain new perspectives on your daily experiences. With AI-powered reflections from Google's Gemini API and a beautiful, intuitive interface, Life Canvas turns journaling into a delightful and insightful habit.
 
 ---
